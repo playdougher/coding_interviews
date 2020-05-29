@@ -1,3 +1,29 @@
+# 目录
+
+<!-- vim-markdown-toc GFM -->
+
+* [剑指offer习题](#剑指offer习题)
+	* [1.赋值运算符函数](#1赋值运算符函数)
+	* [2.实现Singleton模式](#2实现singleton模式)
+	* [4.二维数组中的查找](#4二维数组中的查找)
+	* [5.替换空格](#5替换空格)
+	* [6.从尾到前打印链表](#6从尾到前打印链表)
+	* [7.重建二叉树](#7重建二叉树)
+	* [9.用两个栈实现队列](#9用两个栈实现队列)
+	* [11.旋转数组的最小数字](#11旋转数组的最小数字)
+	* [10.fibonacci数列](#10fibonacci数列)
+	* [15.二进制中1的个数](#15二进制中1的个数)
+	* [16：数值的整数次方](#16数值的整数次方)
+	* [17：打印1到最大的n位数](#17打印1到最大的n位数)
+	* [18：在O(1)时间删除链表结点](#18在o1时间删除链表结点)
+	* [21：调整数组顺序使奇数位于偶数前面](#21调整数组顺序使奇数位于偶数前面)
+	* [22：链表中倒数第k个节点](#22链表中倒数第k个节点)
+	* [23：链表中环的入口节点](#23链表中环的入口节点)
+	* [24：反转链表](#24反转链表)
+	* [25：合并两个排序的链表](#25合并两个排序的链表)
+
+<!-- vim-markdown-toc -->
+
 # 剑指offer习题 
 
 ## 1.赋值运算符函数
@@ -50,7 +76,7 @@ CMyString& CMyString::operator = (const CMyString &str){
 
 [Singleton](https://www.cnblogs.com/cxjchen/p/3148582.html)
 
-## 3.二维数组中的查找
+## 4.二维数组中的查找
 
 题目：在一个二维数组中，每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。请完成一个函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
 
@@ -93,7 +119,7 @@ public:
 };
 ```
 
-## 4.替换空格
+## 5.替换空格
 
 题目：请实现一个函数，把字符串中的每个空格替换成“%20"。例如输入“We are happy.”，则输出“We%20are%20happy.”。
 
@@ -146,7 +172,7 @@ public:
 };
 ```
 
-## 5.从尾到前打印链表
+## 6.从尾到前打印链表
 
 题目：输入一个链表的头结点，从尾到头反过来打印出每个结点的值。
 
@@ -180,7 +206,7 @@ public:
     }
 };
 ```
-## 6.重建二叉树
+## 7.重建二叉树
 
 题目：输入某二叉树的前序遍历和中序遍历的结果，请重建出该二文树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。例如输入前序遍历序列{1，2，4，7，3，5，6，8}和中序遍历序列{4，7，2，1，5，3，8，6}，则重建出图2.6所示的二叉树并输出它的头结点。二叉树结点的定义如下：
 
@@ -217,9 +243,9 @@ public:
         return constructCore(pre,0,pre.size()-1, in,0,in.size()-1);
     }
 }; 
- ```
+```
  
-## 7.用两个栈实现队列
+## 9.用两个栈实现队列
 
 题目：用两个栈实现一个队列。队列的声明如下，请实现它的两个函数appendTail和deleteHead，分别完成在队列尾部插入结点和在队列头部删除结点的功能。
 
@@ -262,7 +288,7 @@ private:
 };
 ```
  
-## 8. 旋转数组的最小数字
+## 11.旋转数组的最小数字
  
 题目：把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序的数组的一个旋转，输出旋转数组的最小元素。例如数组{3，4，5，1，2}为（1，2，3，4，5}的一个旋转，该数组的最小值为1。
  
@@ -289,4 +315,463 @@ public:
 };
 ```
  
-## 9.
+## 10.fibonacci数列
+
+题目一：写一个函数，输入n，求斐波那契（Fibonacci）数列的第n项。
+斐波那契数列的定义如下：
+
+![](assets/img9.png)
+
+解法：用动态规划，a代表f(n-1),b代表f(n)
+
+```c
+class Solution {
+public:
+    int Fibonacci(int n) {
+        int a= 0;
+        int b = 1;
+        if (n <= 0) b = 0;
+        for(int i  = 2; i <= n ; i++){
+            b += a;
+            a = b-a;
+        }
+        return b;
+    }
+};
+```
+
+题目二：一只青蛙一次可以跳上1级台阶，也可以跳上2级。求该青蛙跳上一个n级的台阶总共有多少种跳法。
+
+解法：设f(n)为跳台阶的种数，第一次要么1要么2，所以f(n) = f(n-1)+f(n-2)，为fibonacci数列。
+
+需要注意的是，初始条件和上题有些差别
+
+```c
+/*
+ * 1. n=0 f(n)=0
+ * 2. n=1 f(n)=1
+ * 3. n=2 f(n)=2
+ * 4. n>2 f(n)=f(n-1)+f(n-2)
+ */
+class Solution {
+public:
+    int jumpFloor(int n) {
+        int a= 1; // f(n-1)
+        int b = 2; // f(n)
+        if (n <= 0) b = 0;
+        else if(n == 1) b = 1;
+        
+        for(int i  = 3; i <= n ; i++){
+            b += a;
+            a = b-a;
+        }
+        return b;
+    }
+};
+
+```
+
+## 15.二进制中1的个数
+题目：请实现一个函数，输入一个整数，输出该数二进制表示中1的个数。例如把9表示成二进制是1001，有2位是1。因此如果输入9，该函数输出2。
+
+解法：一种是设一个flag，从右往左和该整数作‘与’运算。需要的次数为计算机位数(32或64)。  
+另一种是比较有技巧性的，(n-1)&n会将n的最右一个1变为0  
+该方法循环的次数是1的个数值。
+
+```c
+ class Solution {
+ public:
+      int  NumberOf1(int n) {
+          int cnt = 0;
+          int flag = 1;
+          while(flag){
+              if(n & flag) ++cnt;
+              flag = flag << 1;
+          }
+          return cnt;
+      }
+ };
+```
+
+```c
+class Solution {
+public:
+     int  NumberOf1(int n) {
+         int cnt = 0;
+         while(n){
+             cnt++;
+             n = (n-1)&n;
+         }
+         return cnt;
+     }
+};
+```
+
+## 16：数值的整数次方
+
+题目：实现函数double Power（double base，int exponent），求base的lexponent次方。不得使用库函数，同时不需要考虑大数问题。
+
+解法：
+```c
+/*
+ * 1. 如2^32次方，可以通过2^16平方取得。可用递归。
+ * 2. 注意：若指数<0，分母有可能为0。
+ */
+class Solution {
+public:
+    double power_recur(double base, int exponent){
+        if(exponent == 0) return 1;
+
+        // exponent/2
+        double result = power_recur(base,exponent >> 1);
+        result *= result;
+
+        //exponent若不能被2整除
+        if(exponent&1) result *= base;
+        return result;
+    }
+    double Power(double base, int exponent)
+        int exp = exponent;
+        if(exponent < 0) {
+            exp = -exp;
+            //分母不为0
+            if(fabs(base-0.0) < 0.0000001) return 0;
+        }
+
+        double result = power_recur(base, exp);
+        return exponent > 0 ? result : 1/result;
+    }
+};
+```
+
+## 17：打印1到最大的n位数
+
+题目：输入数字n，按顺序打印出从1最大的n位十进制数。比如输入3，则打印出1、2、3一直到最大的3位数即999。
+
+解法：  
+* 因为该数可能很大，所以用数组来存。  
+* 每个数其实是由‘0’~‘9’排列而成。
+* 现只需递归地，从小到大地生成字符串即可
+	* 如当n=3：
+	* 000, 001, ..., 010, 011, ..., 999.
+* 需注意的是，前面的0不必输出，所以输出时要处理一下。
+
+```c
+void print_1_to_max_of_digits(int n){
+    if(n <= 0) return;
+    char number[n+1] = "";
+    print_digits_recur(number, n, 0);
+}
+
+void print_digits_recur(char * number, int n, int index){
+    //此时该数已构建完成，可以输出
+    if(index == n){
+        print_number(number, n);
+        cout << ' ';
+        return;
+    }
+    for(int i = 0; i <= 9; i++){
+        number[index] = i+'0';
+        print_digits_recur(number, n, index+1);
+    }
+}
+
+void print_number(char *number, int n){
+    int ind = 0;
+    while(number[ind] == '0' and ind < n){
+        ind++;
+    }
+    while(ind < n) cout << number[ind++];
+}
+int main(){
+    print_1_to_max_of_digits(4);
+    return 0;
+}
+```
+
+## 18：在O(1)时间删除链表结点
+
+题目：给定单向链表的头指针和一个结点指针，定义一个函数在O(1)时间删除该结点。链表结点与函数的定义如下：
+
+解法:该题给定一个节点的指针，删除链表中的该节点。可以通过将要删除节点的下一个节点的值赋予该删除节点，然后删除下一个节点，以实现删除当前节点的操作。
+
+图中(a)为原数组，(c)为删除过程，i为要删除的节点
+
+![](assets/img13.png)
+
+```c
+struct ListNode{
+    int m_nValue;
+    ListNode *m_pNext;
+};
+void delete_node(ListNode **pListHead, ListNode *pToBeDeleted){
+   if(!pListHead or !pToBeDeleted) return;
+
+   // 找得到且不为尾结点
+   if(pToBeDeleted->m_pNext != NULL){
+       ListNode *pNext = pToBeDeleted->m_pNext;
+       pToBeDeleted->m_nValue = pNext->m_nValue;
+       pToBeDeleted->m_pNext = pNext->m_pNext;
+
+       delete pNext;
+       pNext = NULL;
+   }
+
+   // 找得到且为尾结点同时为头结点, pListHead需置为空
+   else if(*pListHead == pToBeDeleted){
+       delete pToBeDeleted;
+       pToBeDeleted = NULL;
+       *pListHead = NULL;
+   }
+
+   // 找得到且为尾结点(非头结点)
+   else{
+       ListNode *pNode = *pListHead;
+       while(pNode->m_pNext != pToBeDeleted){
+           pNode = pNode->m_pNext;
+       }
+
+       pNode->m_pNext = NULL;
+       deelte pToBeDeleted;
+       pToBeDeleted = NULL;
+    }
+}
+```
+
+## 21：调整数组顺序使奇数位于偶数前面
+
+题目：输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。
+
+解法一:  
+前后各设置一个指针，往中间遍历，若发现不符合的两个数字，互换。
+
+```c
+void ReorderOddEven_1(int *p_data, int length){
+    if(!p_data or length==0) return;
+
+    int *p_beg = p_data;
+    int *p_end = p_data+length-1;
+
+    while(p_beg < p_end){
+        // odd
+        while(p_beg < p_end and (*p_beg & 1)){
+            p_beg++;
+        }
+        // even
+        while(p_beg < p_end and !(*p_beg & 1)){
+            p_end--;
+        }
+        int tmp = *p_beg;
+        *p_beg = *p_end;
+        *p_end = tmp;
+    }
+}
+```
+
+解法二：  
+若把题目条件改成负数在非负前面或者不能被3整除的在能被3整除的前面，需要修改while中的判断条件，而加了一个函数指针后，只需要传入相应函数即可判断，提高了程序健壮性
+
+
+```c
+void ReorderOddEven_2(int *pData, unsigned int length)
+{
+    Reorder(pData, length, is_even);
+}
+
+bool is_even(int num){
+    return (num&1) == 0;
+}
+void Reorder(int *p_data, int length, bool (*fun)(int)){
+    if(!p_data or length==0) return;
+
+    int *p_beg = p_data;
+    int *p_end = p_data+length-1;
+
+    while(p_beg < p_end){
+        // odd
+        while(p_beg < p_end and !fun(*p_beg)){
+            p_beg++;
+        }
+        // even
+        while(p_beg < p_end and fun(*p_end)){
+            p_end--;
+        }
+        int tmp = *p_beg;
+        *p_beg = *p_end;
+        *p_end = tmp;
+    }
+}
+```
+
+## 22：链表中倒数第k个节点
+
+题目：输入一个链表，输出该链表中倒数第k个节点。为了符合大多数人的习惯，本题从1开始计数，即链表的尾节点是倒数第1个节点。例如，一个链表有6个节点，从头节点开始，它们的值依次是1、2、3、4、5、6。这个链表的倒数第3个节点是值为4的节点。链表节点定义如下：
+
+解法： 用双指针，指针距离为k，只需遍历一次链表即可得答案。
+
+注意：k可能大于链表长度。  
+
+```c
+struct ListNode{
+    int m_nValue;
+    ListNode *m_pNext;
+}
+
+ListNode* FindKthToTail(ListNode *p_list_head, int k){
+    if(!p_list_head or k <= 0) return nullptr;
+
+    ListNode *p1 = p_list_head;
+    ListNode *p2 = p1;
+
+    // 若下个节点存在，往下循环。
+    while(--k and p2->m_pNext){
+        p2 = p2->m_pNext;
+    }
+
+    // 若k不为0，说明k大于链表长度.
+    if(k){
+        return nullptr;
+    }
+
+    while(p2->m_pNext){
+        p1 = p1->m_pNext;
+        p2 = p2->m_pNext;
+    }
+    return p1;
+}
+```
+
+## 23：链表中环的入口节点
+
+题目：如果一个链表中包含环，如何找出环的入口节点？例如，在如图3.8所示的链表中，环的入口节点是节点3。
+
+解法：  
+1. 先判断有没有环
+	* 设置两个指针，一个快一个慢，若快的能追上慢的，则有环
+2. 再判断入口节点
+	* 设置两个指针，设环有n个节点，则让其中一个先跑n个节点，然后两个指针往前走，一次各走一步，碰面时就位于入口处。（因为在环中，距离为n+1的节点位于相同位置）  
+![](assets/img23.png)
+
+```c
+struct ListNode{
+    int m_nValue;
+    ListNode *m_pNext;
+}
+ListNode* MeetingNode(ListNode *p_head){
+    ListNode *p_slow = p_head;
+    ListNode *p_fast = p_slow;
+
+    while(p_fast){
+        p_slow = p_slow->m_pNext;
+        p_fast = p_fast->m_pNext;
+        if(p_fast)
+            p_fast = p_fast->m_pNext;
+
+        if(p_slow == p_fast) return p_fast;
+    }
+
+    return nullptr;
+}
+
+ListNode* EntryNodeOfLoop(ListNode *p_head){
+
+    ListNode *node = MeetingNode(p_head);
+    if(!node) return nullptr;
+
+    int loop_node_cnt = 1;
+    ListNode *tmp_node = node;
+    tmp_node = tmp_node->m_pNext;
+
+	//计算环的长度
+    while(tmp_node != node){
+        tmp_node = tmp_node->m_pNext;
+        loop_node_cnt++;
+    }
+
+    ListNode *p1 = p_head;
+    ListNode *p2 = p_head;
+
+    while(loop_node_cnt--){
+        p2 = p2->m_pNext;
+    }
+
+    while(p1 != p2){
+        p1 = p1->m_pNext;
+        p2 = p2->m_pNext;
+    }
+    return p2;
+}
+```
+
+## 24：反转链表
+
+题目：定义一个函数，输入一个链表的头节点，反转该链表并输出反转后链表的头节点。链表节点定义如下：
+
+解法：
+* 在反转链表的时候，链表会断，所以要把下下个节点保存起来。  
+* 只有一个节点的情况要注意下。
+
+![](assets/img24.png)
+
+注意：书中把当前节点设为中间的那个，代码会比较统一。我用的第一个为当前节点比较复杂。
+
+```c
+struct ListNode{
+    int m_nValue;
+    ListNode *m_pNext;
+}
+ListNode *ReverseList(ListNode *p_head){
+    if(!p_head) return nullptr;
+
+    ListNode *cur = p_head; //first node
+    ListNode *next = cur->m_pNext; //second node
+    cur->m_pNext = nullptr; 
+
+    //only one node exists.
+    if(!next) return p_head;
+
+    ListNode *next_next = next->m_pNext; //third node
+    while(1){
+        next->m_pNext = cur;
+
+        cur = next;
+        next = next_next;
+
+        if(!next) break;
+        next_next = next->m_pNext;
+    }
+
+    return cur;
+}
+```
+
+## 25：合并两个排序的链表
+
+题目：输入两个递增排序的链表，合并这两个链表并使新链表中的节点仍然是递增排序的。例如，输入图3.11中的链表1和链表2，则合并之后的升序链表如链表3所示。链表节点定义如下：
+
+解法：判断前两个数字，取小的作为头节点，递归往下执行。
+
+![](assets/img25.png)
+
+```c
+ListNode* merge(ListNode *p_head1, ListNode *p_head2){
+    // p_head2 or p_head1 is null.
+    if(!p_head1) return p_head2;
+    else if(!p_head2) return p_head1;
+
+    ListNode *p_head = nullptr;
+
+    if(p_head1->m_nValue < p_head2->m_nValue){
+        p_head1->m_pNext = merge(p_head1->m_pNext, p_head2);
+        p_head = p_head1;
+    }
+    else{
+        p_head2->m_pNext = merge(p_head1, p_head2->m_pNext);
+        p_head = p_head2;
+    }
+
+    return p_head;
+}
+```
+
+
