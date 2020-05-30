@@ -10,8 +10,8 @@
 	* [6.从尾到前打印链表](#6从尾到前打印链表)
 	* [7.重建二叉树](#7重建二叉树)
 	* [9.用两个栈实现队列](#9用两个栈实现队列)
-	* [11.旋转数组的最小数字](#11旋转数组的最小数字)
 	* [10.fibonacci数列](#10fibonacci数列)
+	* [11.旋转数组的最小数字](#11旋转数组的最小数字)
 	* [15.二进制中1的个数](#15二进制中1的个数)
 	* [16：数值的整数次方](#16数值的整数次方)
 	* [17：打印1到最大的n位数](#17打印1到最大的n位数)
@@ -21,6 +21,12 @@
 	* [23：链表中环的入口节点](#23链表中环的入口节点)
 	* [24：反转链表](#24反转链表)
 	* [25：合并两个排序的链表](#25合并两个排序的链表)
+	* [26：树的子结构](#26树的子结构)
+	* [面试题27：二叉树的镜像](#面试题27二叉树的镜像)
+	* [面试题28：对称的二叉树](#面试题28对称的二叉树)
+	* [面试题30：包含min函数的栈](#面试题30包含min函数的栈)
+	* [面试题31：栈的压入、弹出序列](#面试题31栈的压入弹出序列)
+	* [面试题32：从上到下打印二叉树](#面试题32从上到下打印二叉树)
 
 <!-- vim-markdown-toc -->
 
@@ -288,33 +294,6 @@ private:
 };
 ```
  
-## 11.旋转数组的最小数字
- 
-题目：把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序的数组的一个旋转，输出旋转数组的最小元素。例如数组{3，4，5，1，2}为（1，2，3，4，5}的一个旋转，该数组的最小值为1。
- 
-```c
-class Solution {
-public:
-    int minNumberInRotateArray(vector<int> rotateArray) {
-        int left = 0;
-        int right = rotateArray.size()-1;
-        if(left > right) return -1;
-        if(rotateArray[left] < rotateArray[right]) return rotateArray[0];
-        while(left < right){
-            int mid = (left+right)/2;
-            if(rotateArray[left] < rotateArray[mid]){
-                left = mid;
-            }
-            else if (rotateArray[mid] < rotateArray[right]){
-                right = mid;
-            }
-            else left++;
-        }
-        return rotateArray[right];
-    }
-};
-```
- 
 ## 10.fibonacci数列
 
 题目一：写一个函数，输入n，求斐波那契（Fibonacci）数列的第n项。
@@ -369,6 +348,33 @@ public:
     }
 };
 
+```
+
+## 11.旋转数组的最小数字
+ 
+题目：把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序的数组的一个旋转，输出旋转数组的最小元素。例如数组{3，4，5，1，2}为（1，2，3，4，5}的一个旋转，该数组的最小值为1。
+ 
+```c
+class Solution {
+public:
+    int minNumberInRotateArray(vector<int> rotateArray) {
+        int left = 0;
+        int right = rotateArray.size()-1;
+        if(left > right) return -1;
+        if(rotateArray[left] < rotateArray[right]) return rotateArray[0];
+        while(left < right){
+            int mid = (left+right)/2;
+            if(rotateArray[left] < rotateArray[mid]){
+                left = mid;
+            }
+            else if (rotateArray[mid] < rotateArray[right]){
+                right = mid;
+            }
+            else left++;
+        }
+        return rotateArray[right];
+    }
+};
 ```
 
 ## 15.二进制中1的个数
@@ -773,5 +779,193 @@ ListNode* merge(ListNode *p_head1, ListNode *p_head2){
     return p_head;
 }
 ```
+
+## 26：树的子结构
+
+题目：输入两棵二叉树A和B，判断B是不是A的子结构。二叉树节点的定义如下：
+
+解法：  
+* 首先找到第二棵树的根节点在第一棵树上的位置，然后看是否是第一棵树的子树(递归)
+
+![](assets/img26.png)
+
+注意：DoesTree1HaveTree2中:  
+若第二棵树遍历到空节点了，说明它上面的节点都符合要求，所以返回true。  
+若第二棵树节点不为空，第一棵树的节点为空，说明第二棵不是子树。
+
+```c
+bool DoesTree1HaveTree2(BinaryTreeNode* p_root1, BinaryTreeNode* p_root2){
+    bool res = false;
+
+	//!!
+    if(!p_root2) return true;
+    if(!p_root1) return false;
+
+    //std::cout <<"p_root1:" << p_root1->m_dbValue <<" p_root2:" <<p_root2->m_dbValue << std::endl;;
+    if(fabs(p_root1->m_dbValue-p_root2->m_dbValue) < 0.0000001){
+        res = DoesTree1HaveTree2(p_root1->m_pLeft, p_root2->m_pLeft);
+        res = res and DoesTree1HaveTree2(p_root1->m_pRight, p_root2->m_pRight);
+    }
+    return res;
+}
+
+bool HasSubtree(BinaryTreeNode* p_root1, BinaryTreeNode* p_root2){
+    bool res = false;
+
+    if(!p_root2 or !p_root1) return false;
+
+    if(fabs(p_root1->m_dbValue-p_root2->m_dbValue) < 0.0000001) {
+        res = DoesTree1HaveTree2(p_root1, p_root2);
+    }
+
+    if(!res){
+        res = HasSubtree(p_root1->m_pLeft, p_root2);
+        res = res or HasSubtree(p_root1->m_pRight, p_root2);
+    }
+    return res;
+}
+```
+
+## 面试题27：二叉树的镜像
+
+题目：请完成一个函数，输入一棵二叉树，该函数输出它的镜像。叉树节点的定义如下：
+
+解法：只需要递归地把, 左右子树互换。
+
+```c
+void MirrorRecursively(BinaryTreeNode *p_node) {
+    if( !p_node ) return;
+	
+	//swap nodes.
+    BinaryTreeNode *tmp_node = p_node->m_pLeft;
+    p_node->m_pLeft = p_node->m_pRight;
+    p_node->m_pRight = tmp_node;
+
+    MirrorRecursively(p_node->m_pRight);
+    MirrorRecursively(p_node->m_pLeft);
+}
+```
+
+## 面试题28：对称的二叉树
+
+题目：请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。例如，在如图4.3所示的3棵二叉树中，第一棵二叉树是对称的，而另外两棵不是。
+
+解法：看它的前序遍历序列(前左右)和镜像的前序遍历序列(前右左)是否相同
+
+![](assets/img28.png)
+
+```c
+//==========func============
+bool isSymmetrical(BinaryTreeNode *p_root1, BinaryTreeNode *p_root2) {
+    if(!p_root2 and !p_root1) return true;
+
+    if(p_root1 and p_root2) {
+        bool res = isSymmetrical(p_root1->m_pLeft, p_root2->m_pRight) and
+            isSymmetrical(p_root1->m_pRight, p_root2->m_pLeft);
+        if(p_root1->m_nValue == p_root2->m_nValue and res) return true;
+    }
+    return false;
+}
+
+bool isSymmetrical(BinaryTreeNode *p_root){
+    if(!p_root) return true;
+    return isSymmetrical(p_root->m_pLeft, p_root->m_pRight);
+}
+```
+
+## 面试题30：包含min函数的栈
+
+题目：定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的min函数。在该栈中，调用min、push及pop的时间复杂度都是O（1）。 
+
+解法：首先想到的是用变量保存最小值，但是一旦最小值被弹出，就得找比当前值小的那个最小值。也就是说，最小值随时可能被弹出，我们需要找到弹出后的栈内的最小值。所以想到要用另外一个栈来保存当前栈的最小值。
+
+![](assets/img30.png)
+
+```c
+template <typename T>
+void StackWithMin<T>::push(const T& val){
+    m_data.push(val);
+
+    if(m_min.size() == 0 or val < m_min.top())
+        m_min.push(val);
+    else m_min.push(m_min.top());
+}
+
+template <typename T>
+void StackWithMin<T>::pop(){
+    assert (m_data.size() > 0 and m_min.size() > 0);
+    m_data.pop();
+    m_min.pop();
+}
+
+template <typename T>
+const T& StackWithMin<T>::min() const{
+    assert (m_data.size() > 0 and m_min.size() > 0);
+    return m_min.top();
+}
+```
+
+## 面试题31：栈的压入、弹出序列
+
+题目：输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否为该栈的弹出顺序。假设压入栈的所有数字**均不相等**。例如，序列{1，2，3，4，5}是某栈的压栈序列，序列{4，5，3，2，1}是该压栈序列对应的一个弹出序列，但{4，3，5，1，2}就不可能是该压栈序列的弹出序列。
+
+解法：因为要以p_pop序列弹出，所以：  
+2. p_push序列必须不停压栈，直到要压的值等于p_pop当前要弹出的值  
+1. 若要弹出的值等于栈顶值，直接弹出  
+
+注意：c数组的末尾无法像c++一样用.end()，得自己算出位置。
+
+```c
+bool IsPopOrder(const int *p_push, const int *p_pop, int length){
+    std::stack<int> st;
+    const int *p_pop_end = p_pop + length;
+    const int *p_push_end = p_push + length;
+    if(!p_push or !p_pop) return false;
+
+    while(p_pop != p_pop_end){
+        if(st.size() and *p_pop == st.top()) {
+            st.pop();
+            p_pop++;
+        }
+        else {
+            while(p_push!=p_push_end and *p_push != *p_pop) {
+                st.push(*p_push);
+                p_push++;
+            }
+            if(p_push==p_push_end) return false;
+
+            p_pop++;
+            p_push++;
+        }
+    }
+    return true;
+}
+```
+
+## 面试题32：从上到下打印二叉树
+
+题目一：不分行从上到下打印二叉树
+从上到下打印出二又树的每个节点，同一层的节点按照从左到右的顺序打印。例如，输入图4.6中的二叉树，则依次打印出8，6，10，5，7，9，11。二叉树节点的定义如下：
+
+解法：广度优先遍历，可以用队列
+
+```c
+void PrintFromTopToBottom(BinaryTreeNode *p_tree_root){
+    if(!p_tree_root) return;
+
+    std::deque<BinaryTreeNode *> deq;
+    deq.push_back(p_tree_root);
+    while(!deq.empty()){
+        BinaryTreeNode *node = deq.front();
+        deq.pop_front();
+        printf("%d ",node->m_nValue);
+        if(node->m_pLeft)
+            deq.push_back(node->m_pLeft);
+        if(node->m_pRight)
+            deq.push_back(node->m_pRight);
+    }
+}
+```
+
 
 
