@@ -27,6 +27,10 @@
 	* [面试题30：包含min函数的栈](#面试题30包含min函数的栈)
 	* [面试题31：栈的压入、弹出序列](#面试题31栈的压入弹出序列)
 	* [面试题32：从上到下打印二叉树](#面试题32从上到下打印二叉树)
+	* [面试题33：二叉搜索树的后序遍历序列](#面试题33二叉搜索树的后序遍历序列)
+	* [面试题34：二叉树中和为某一值的路径](#面试题34二叉树中和为某一值的路径)
+	* [面试题35：复杂链表的复制](#面试题35复杂链表的复制)
+	* [面试题36：二叉搜索树与双向链表](#面试题36二叉搜索树与双向链表)
 
 <!-- vim-markdown-toc -->
 
@@ -966,6 +970,262 @@ void PrintFromTopToBottom(BinaryTreeNode *p_tree_root){
     }
 }
 ```
+
+题目二：分行从上到下打印二叉树。  
+从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印，每一层打印到一行。例如，打印图4.7中二叉树的结果为：
+
+解法：只需在合适的地方输入换行符即可,在上题基础上小修改一下。 当前行不断出队，下一行不断进队，我们需要记录这两行的结束位置，所以设置两个变量保存其长度。当当前行输出结束，输出一个换行符，进入下一个循环。
+
+![](assets/img32_2.png)
+
+```c
+void Print(BinaryTreeNode* p_tree_root){
+    if(!p_tree_root) return;
+
+    std::deque<BinaryTreeNode *> deq;
+    deq.push_back(p_tree_root);
+
+    int cnt_cur = 1;
+    int cnt_next = 0;
+    while(!deq.empty()){
+        BinaryTreeNode *node = deq.front();
+        deq.pop_front();
+        cnt_cur--;
+        printf("%d ",node->m_nValue);
+
+        if(node->m_pLeft){
+            deq.push_back(node->m_pLeft);
+            cnt_next++;
+        }
+
+        if(node->m_pRight){
+            deq.push_back(node->m_pRight);
+            cnt_next++;
+        }
+
+        if(!cnt_cur){
+            printf("\n");
+            cnt_cur = cnt_next;
+            cnt_next = 0;
+        }
+    }
+}
+```
+
+题目三：之字形打印二叉树。  
+请实现一个函数按照之字形顺序打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右到左的顺序打印，第三行再按照从左到右的顺序打印，其他行以此类推。例如，按之字形顺序打印图4.8中二叉树的结果为：
+
+解法：因为每次都是上一次的相反顺序，所以可以用栈。如图：
+
+![](assets/img32_3.png)
+
+```c
+void Print(BinaryTreeNode *p_root){
+    if(!p_root) return;
+
+    std::stack<BinaryTreeNode *> stk1;
+    std::stack<BinaryTreeNode *> stk2;
+
+    stk1.push(p_root);
+
+    while(!stk1.empty() or !stk2.empty()){
+        if(stk2.empty()){
+            while(!stk1.empty()){
+                BinaryTreeNode *node = stk1.top();
+                stk1.pop();
+                printf("%d ", node->m_nValue);
+                if(node->m_pLeft){
+                    stk2.push(node->m_pLeft);
+                }
+                if(node->m_pRight){
+                    stk2.push(node->m_pRight);
+                }
+            }
+            printf("\n");
+        }
+        else if(stk1.empty()){
+            while(!stk2.empty()){
+                BinaryTreeNode *node = stk2.top();
+                stk2.pop();
+                printf("%d ", node->m_nValue);
+                if(node->m_pRight){
+                    stk1.push(node->m_pRight);
+                }
+                if(node->m_pLeft){
+                    stk1.push(node->m_pLeft);
+                }
+            }
+            printf("\n");
+        }
+    }
+}
+```
+
+## 面试题33：二叉搜索树的后序遍历序列
+
+题目：输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回true，否则返回false。假设输入的数组的任意两个数字都互不相同。例如，输入数组{5，7，6，9，11，10，8}，则返回true，因为这个整数序列是图4.9二叉搜索树的后序遍历结果。如果输入的数组是{7，4，6，5}，则由于没有哪棵二叉搜索树的后序遍历结果是这个序列，因此返回false。
+
+注意：题目说的是二叉搜索树，也就是中序遍历为有序数列的树，不是普通树。
+
+解法：因为后序遍历的最后一个节点为根节点，而该树又为二叉搜索树，所以数组最后一个数前面的数能被分为两部分，前一部分比根节点小，后一部分比根节点大。而这两部分又分别为一个后序遍历序列，也满足如上规则，所以可以用递归。  
+若能被成功分为一小一大两部分，**或少于两部分**。大于两部分就说明不是个二叉搜索树，则返回true  
+若不能，则false
+
+![](assets/img33.png)
+
+```c
+bool VertifySequenceOfBST(int seq[], int length){
+    if(!seq) return false;
+    if(!length) return true;
+
+    int i = length-1;
+    int val = seq[i--];
+    int right_tree_len = 0;
+
+    while(i>=0 and seq[i] > val){
+        i--;
+        right_tree_len++;
+    }
+    while(i>=0 and seq[i] < val){
+        i--;
+    }
+    if(i == -1) return true;
+    else return false;
+
+    int left_tree_len = length-right_tree_len-1;
+    VertifySequenceOfBST(seq,left_tree_len);
+    VertifySequenceOfBST(seq+left_tree_len,left_tree_len);
+}
+```
+
+## 面试题34：二叉树中和为某一值的路径
+
+题目：输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。从树的根节点开始往下一直到叶节点所经过的节点形成一条路径。二叉树节点的定义如下：
+
+注意：题目是要求开始节点为根，结束节点为叶结点。我一开始以为是随便节点都行。后面实现的代码没满足第二个要求（结束为叶结点）,不过加个判断语句就行了。
+
+解法：用前序遍历，若碰到当前节点和sum值相同，说明路径已经建立好，可以输出了。我用一个队列保存了输出路径。
+
+```c
+void FindPath(BinaryTreeNode *p_root, int sum, std::queue<BinaryTreeNode *> que){
+    if(!p_root or sum < 0) return;
+
+    //printf("p_root value: %d\n", p_root->m_nValue);
+    que.push(p_root);
+
+    if(p_root->m_nValue == sum){
+        while (!que.empty()){
+            printf("%d ", que.front()->m_nValue);
+            que.pop();
+        }
+        printf("\n");
+        return;
+    }
+
+    int next_sum = sum-p_root->m_nValue;
+    if(p_root->m_pLeft)
+        FindPath(p_root->m_pLeft, next_sum, que);
+
+    if(p_root->m_pRight)
+        FindPath(p_root->m_pRight, next_sum, que);
+}
+
+void FindPath(BinaryTreeNode *p_root, int sum){
+    std::queue<BinaryTreeNode *> que;
+    FindPath(p_root, sum, que);
+}
+```
+
+## 面试题35：复杂链表的复制
+
+题目：请实现函数ComplexListNode*Clone（ComplexListNode*pHead），复制一个复杂链表。在复杂链表中，每个节点除了有一个m_pNext 指针指向下一个节点，还有一个m_pSibling指针指向链表中的任意节点或者nullptr。节点的C++定义如下：
+
+解法：若顺序创建链表节点及其next、sibling，因为m_pSibling可能在当前节点的后面，此时还没有创建该节点，所以这样不合适。  
+我们可以先把整条链表的next先连接起来，再连接sibling。  
+关于连接sibling，有三种实现方法:  
+先假设克隆前的链表为list_old, 克隆后的为list_new.  
+1. 因为不知道要连接的节点在当前节点的前面还是后面，所以每次设置sibling都要两条链表同时往后遍历，直到碰到list_old的sibling节点，同时，list_new的当前节点也就是要链接的sibling节点了。复杂度为O(n^2)  
+2. 第二种是用一个映射数组存储list_old和list_new节点的一一对应关系，这样就能在O(1)时间内找到ilst_old的sibling对应的list_new的sibling.但是这会消耗额外的空间。
+3. 第三种在每个list_old节点后面新建每个节点的克隆，也即该结构默认表示了一种一一对应的关系，设置sibling的时候也能直接找到节点。最后将两个链表拆开，就获得了克隆的复杂链表。
+
+![第三种](assets/img35.png)
+
+这里用第三种来解题，步骤如下：  
+1. 将链表复制一遍
+2. 连接sibling
+3. 分开两条链表
+
+![](assets/img35_2.png)
+
+```c
+ComplexListNode *CloneNodes(ComplexListNode *p_head){
+    if(!p_head) return nullptr;
+
+    ComplexListNode *p_node_new = new ComplexListNode(p_head->m_nValue);
+    CloneNodes(p_head->m_pNext);
+
+    ComplexListNode *p_head_next = p_head->m_pNext;
+    p_head->m_pNext = p_node_new;
+    p_node_new->m_pNext = p_head_next;
+
+    return p_head;
+}
+
+ComplexListNode *ConnectSiblings(ComplexListNode *p_head){
+    if(!p_head) return nullptr;
+
+    ComplexListNode *p_head_next = p_head->m_pNext;
+
+    if(!p_head->m_pSibling) p_head_next->m_pSibling = nullptr;
+    else p_head_next->m_pSibling = p_head->m_pSibling->m_pNext;
+
+    ConnectSiblings(p_head_next->m_pNext);
+    return p_head;
+}
+
+ComplexListNode *getCloneList(ComplexListNode *p_head){
+    if(!p_head) return nullptr;
+
+    ComplexListNode *p_head_next = p_head->m_pNext;
+
+    p_head->m_pNext = p_head_next->m_pNext;
+    p_head_next->m_pNext = getCloneList(p_head_next->m_pNext);
+
+    return p_head_next;
+}
+
+void print_list_test(ComplexListNode *p_head){
+    ComplexListNode *node = p_head;
+    while(node){
+        printf("%d",node->m_nValue );
+        if(node->m_pSibling){
+            printf("->%d ",node->m_pSibling->m_nValue);
+        }
+        else printf(" ");
+        node = node->m_pNext;
+    }
+
+    printf("\n");
+}
+ComplexListNode *Clone(ComplexListNode *p_head){
+    CloneNodes(p_head);
+    printf("CloneNodes() result:\n");
+    print_list_test(p_head);
+    ConnectSiblings(p_head);
+    printf("ConnectSiblings() result:\n");
+    print_list_test(p_head);
+    ComplexListNode *res = getCloneList(p_head);
+    printf("ComplexListNode() result:\n");
+    print_list_test(p_head);
+    return res;
+}
+```
+
+## 面试题36：二叉搜索树与双向链表
+
+题目：输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。比如，输入图4.15中左边的二叉搜索树，则输出转换之后的排序双向链表。二叉树节点的定义如下：
+
+
 
 
 
