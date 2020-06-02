@@ -31,6 +31,8 @@
 	* [面试题34：二叉树中和为某一值的路径](#面试题34二叉树中和为某一值的路径)
 	* [面试题35：复杂链表的复制](#面试题35复杂链表的复制)
 	* [面试题36：二叉搜索树与双向链表](#面试题36二叉搜索树与双向链表)
+	* [面试题37：序列化二叉树](#面试题37序列化二叉树)
+	* [面试题38：字符串的排列](#面试题38字符串的排列)
 
 <!-- vim-markdown-toc -->
 
@@ -1225,7 +1227,153 @@ ComplexListNode *Clone(ComplexListNode *p_head){
 
 题目：输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。比如，输入图4.15中左边的二叉搜索树，则输出转换之后的排序双向链表。二叉树节点的定义如下：
 
+解法：我的实现是先构建左子树，根节点左指针指向左子树最右节点，根节点右指针指向右子树最左节点。这方法比较繁琐，逻辑较书中的比较复杂。  
+书中是用一个变量保存当前树最右节点。然后递归地构建左子树的双向链表->(根节点+左子树)的双向链表->(根+左+右)子树的双向链表。逻辑清晰易实现。
 
+```c
+
+#define LEFT 0
+#define RIGHT 1
+struct BinaryTreeNode
+{
+    int                    m_nValue;
+    BinaryTreeNode*        m_pLeft;
+    BinaryTreeNode*        m_pRight;
+};
+BinaryTreeNode *Convert(BinaryTreeNode *p_root, int L_or_R){
+    if(!p_root) return nullptr;
+
+    //printf("%d\n", p_root->m_nValue);
+    /*if( p_root->m_nValue== 6){
+        printf("");
+    }
+    */
+    BinaryTreeNode *p_root_left = Convert(p_root->m_pLeft, LEFT);
+    BinaryTreeNode *p_root_right = Convert(p_root->m_pRight, RIGHT);
+
+    if(!p_root_left and !p_root_right) return p_root;
+
+    if(p_root_left){
+        //printf("p_root_left: %d\n", p_root_left->m_nValue);
+        p_root->m_pLeft = p_root_left;
+        p_root_left->m_pRight = p_root;
+    }
+
+    if(p_root_right){
+        //printf("p_root_right: %d\n", p_root_right->m_nValue);
+        p_root->m_pRight = p_root_right;
+        p_root_right->m_pLeft = p_root;
+    }
+
+    BinaryTreeNode *p_node_loop = p_root;
+    //current subtree is a left subtree
+    if(!L_or_R) while(p_node_loop->m_pRight)
+            p_node_loop= p_node_loop->m_pRight;
+    //current subtree is a right subtree
+    else while(p_node_loop->m_pLeft)
+            p_node_loop= p_node_loop->m_pLeft;
+
+    return p_node_loop; //[x]p_node_prev
+
+}
+BinaryTreeNode *Convert(BinaryTreeNode *p_root){
+    return Convert(p_root, RIGHT);
+} 
+```
+
+## 面试题37：序列化二叉树
+
+题目：请实现两个函数，分别用来序列化和反序列化二叉树。
+
+解法：首先想到的是前序和中序能确定一棵树，但是这要求二叉树里不能有相同值的节点，而且得前序中序都知道才能开始反序列化。  
+书中用符号'$'替代空字符，用前序遍历作为序列化的方法，因为这是从根节点开始的，反序列化可以马上根据序列化的输出反序列化出结果。
+
+注意：反序列化函数参数也可用`**`:
+```c
+void Deserialize(BinaryTreeNode **p_root, istream& stream){
+    int num = 0;
+    if(ReadStream(stream, &num)){
+        *p_root = new BinaryTreeNode(num);
+        Deserialize(&(*p_root)->m_pLeft, stream);
+        Deserialize(&(*p_root)->m_pRight, stream);
+    }
+}
+```
+
+```c
+struct BinaryTreeNode
+{
+    int                    m_nValue;
+    BinaryTreeNode*        m_pLeft;
+    BinaryTreeNode*        m_pRight;
+    BinaryTreeNode(int val = 0):m_nValue(val),m_pRight(nullptr),m_pLeft(nullptr){};
+};
+
+bool ReadStream(istream& stream, int *num){
+    char buffer[33] = "";
+
+    char ch;
+    int i = 0;
+    while((stream>>ch) and ch != ','){
+        buffer[i++] = ch;
+    }
+
+    bool is_num = false;
+    if(!stream.eof() and buffer[0] != '$'){
+        *num = atoi(buffer);
+        is_num = true;
+    }
+    return is_num;
+}
+
+void Serialize(const BinaryTreeNode *p_root, ostream& stream){
+    if(!p_root) {
+        stream << "$,";
+        return;
+    }
+
+    stream << p_root->m_nValue << ',' ;
+
+    Serialize(p_root->m_pLeft,stream);
+    Serialize(p_root->m_pRight,stream);
+}
+void Deserialize(BinaryTreeNode *&p_root, istream& stream){
+    int num = 0;
+    if(ReadStream(stream, &num)){
+        p_root = new BinaryTreeNode(num);
+        Deserialize(p_root->m_pLeft, stream);
+        Deserialize(p_root->m_pRight, stream);
+    }
+}
+```
+
+## 面试题38：字符串的排列
+
+题目：输入一个字符串，打印出该字符串中字符的所有排列。例如，输入字符串abc，则打印出由字符a、b、c所能排列出来的所有字符串abc、acb、bac、bca、cab和cba。
+
+解法：将每个字符轮流作为首字符，输出其全排列。递归执行即可。
+
+注意：我没想到参数是多加一个beg变量，我第一次写的时候用一个int变量记录长度，每次只输出一个字符，做不出来。后面才明白每次都要输出整个字符串，而不是每次输出一个字符。
+
+```c
+void Permutation(char* p_str, char* p_beg){
+    if(*p_beg == '\0') {
+        printf("%s\n", p_str);
+        return;
+    }
+
+    for(char* p_ch = p_beg; *p_ch != '\0'; ++p_ch) {
+        std::swap(*p_ch,*p_beg);
+        Permutation(p_str, p_beg + 1);
+        std::swap(*p_ch,*p_beg);
+    }
+}
+
+void Permutation(char* p_str){
+    if(p_str == nullptr) return;
+    Permutation(p_str, p_str);
+}
+```
 
 
 
