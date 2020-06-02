@@ -9,27 +9,24 @@
 
 bool g_bInputInvalid = false;
 
-bool CheckInvalidArray(int* numbers, int length)
+bool CheckInvalidArray(int* num, int length)
 {
     g_bInputInvalid = false;
-    if(numbers == nullptr or length <= 0)
+    if(num == nullptr or length <= 0)
         g_bInputInvalid = true;
 
     return g_bInputInvalid;
 }
 
-bool CheckMoreThanHalf(int* numbers, int length, int number)
-{
-    int times = 0;
-    for(int i = 0; i < length; ++i)
-    {
-        if(numbers[i] == number)
-            times++;
+bool CheckMoreThanHalf(int* num, int length, int number) {
+    int sign = 0;
+    for(int i = 0; i < length; ++i) {
+        if(num[i] == number)
+            sign++;
     }
 
     bool isMoreThanHalf = true;
-    if(times * 2 <= length)
-    {
+    if(sign * 2 <= length) {
         g_bInputInvalid = true;
         isMoreThanHalf = false;
     }
@@ -85,43 +82,38 @@ int MoreThanHalfNum_Solution1(int* num, int length){
 }
 
 // ====================方法2====================
-int MoreThanHalfNum_Solution2(int* numbers, int length)
-{
-    if(CheckInvalidArray(numbers, length))
-        return 0;
+int MoreThanHalfNum_Solution2(int* num, int length) {
+    if(CheckInvalidArray(num, length)) return 0;
 
-    int result = numbers[0];
-    int times = 1;
+    int result = num[0];
+    int sign = 1;
 
     int i = 1;
     while(i < length){
-        if(numbers[i] == result)
-            times++;
+        if(num[i] == result)
+            sign++;
         else
-            times--;
+            sign--;
         i++;
-        if(!times) result = numbers[i];
+        if(!sign) result = num[i];
     }
 
-
-    if(!CheckMoreThanHalf(numbers, length, result))
-        result = 0;
-
+    if(!CheckMoreThanHalf(num, length, result)) result = 0;
     return result;
 }
 
 // ====================测试代码====================
-void Test(char* testName, int* numbers, int length, int expectedValue, bool expectedFlag)
+void Test(char* testName, int* num, int length, int expectedValue, bool expectedFlag)
 {
     if(testName != nullptr)
         printf("%s begins: \n", testName);
 
     int* copy = new int[length];
     for(int i = 0; i < length; ++i)
-        copy[i] = numbers[i];
+        copy[i] = num[i];
 
     printf("Test for solution1: ");
-    int result = MoreThanHalfNum_Solution1(numbers, length);
+    int result = MoreThanHalfNum_Solution1(num, length);
     if(result == expectedValue && g_bInputInvalid == expectedFlag)
         printf("Passed.\n");
     else
@@ -140,36 +132,36 @@ void Test(char* testName, int* numbers, int length, int expectedValue, bool expe
 // 存在出现次数超过数组长度一半的数字
 void Test1()
 {
-    int numbers[] = {1, 2, 3, 2, 2, 2, 5, 4, 2};
-    Test("Test1", numbers, sizeof(numbers) / sizeof(int), 2, false);
+    int num[] = {1, 2, 3, 2, 2, 2, 5, 4, 2};
+    Test("Test1", num, sizeof(num) / sizeof(int), 2, false);
 }
 
 // 不存在出现次数超过数组长度一半的数字
 void Test2()
 {
-    int numbers[] = {1, 2, 3, 2, 4, 2, 5, 2, 3};
-    Test("Test2", numbers, sizeof(numbers) / sizeof(int), 0, true);
+    int num[] = {1, 2, 3, 2, 4, 2, 5, 2, 3};
+    Test("Test2", num, sizeof(num) / sizeof(int), 0, true);
 }
 
 // 出现次数超过数组长度一半的数字都出现在数组的前半部分
 void Test3()
 {
-    int numbers[] = {2, 2, 2, 2, 2, 1, 3, 4, 5};
-    Test("Test3", numbers, sizeof(numbers) / sizeof(int), 2, false);
+    int num[] = {2, 2, 2, 2, 2, 1, 3, 4, 5};
+    Test("Test3", num, sizeof(num) / sizeof(int), 2, false);
 }
 
 // 出现次数超过数组长度一半的数字都出现在数组的后半部分
 void Test4()
 {
-    int numbers[] = {1, 3, 4, 5, 2, 2, 2, 2, 2};
-    Test("Test4", numbers, sizeof(numbers) / sizeof(int), 2, false);
+    int num[] = {1, 3, 4, 5, 2, 2, 2, 2, 2};
+    Test("Test4", num, sizeof(num) / sizeof(int), 2, false);
 }
 
 // 输入空指针
 void Test5()
 {
-   int numbers[] = {1};
-   Test("Test5", numbers, 1, 1, false);
+   int num[] = {1};
+   Test("Test5", num, 1, 1, false);
 }
 
 // 输入空指针

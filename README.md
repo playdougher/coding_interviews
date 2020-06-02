@@ -33,6 +33,7 @@
 	* [面试题36：二叉搜索树与双向链表](#面试题36二叉搜索树与双向链表)
 	* [面试题37：序列化二叉树](#面试题37序列化二叉树)
 	* [面试题38：字符串的排列](#面试题38字符串的排列)
+	* [面试题39：数组中出现次数超过一半的数字](#面试题39数组中出现次数超过一半的数字)
 
 <!-- vim-markdown-toc -->
 
@@ -1375,5 +1376,80 @@ void Permutation(char* p_str){
 }
 ```
 
+## 面试题39：数组中出现次数超过一半的数字
+
+题目：数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如，输入一个长度为9的数组{1，2，3，2，2，2，5，4，2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。
+
+解法：xxxxxxxxxxxxxxxxxxx
+
+```c
+// return the index of data[end]'s final position
+int Partition(int data[], int length, int beg, int end){
+    if(!data or length < 0 or beg<0 or end >= length or beg > end){
+        throw;
+    }
+
+    //make data[end] as the pivot
+
+    //index of number smaller than small_idx are smaller than data[end];
+    int small_idx = beg;
+    int idx = beg;
+
+    while(idx < end){
+        if(data[idx] <= data[end]){
+            if(small_idx != idx) std::swap(data[idx], data[small_idx]);
+            small_idx++;
+        }
+        idx++;
+    }
+
+    std::swap(data[idx], data[small_idx]);
+    return small_idx;
+}
+// ====================方法1====================
+int MoreThanHalfNum_Solution1(int* num, int length){
+    if(CheckInvalidArray(num, length))
+        return 0;
+    int mid_idx = (length-1)/2; //[x] length/2-1,偶偏右
+    int idx_ret = -1;
+    int beg = 0;
+    int end = length-1;
+    int result = 0;
+    //printf("mid_idx:%d\n", mid_idx);
+    while(idx_ret != mid_idx){
+        //printf("beg: %d, end: %d\n", beg, end);
+        idx_ret = Partition(num, length, beg, end);
+        //printf("idx_ret: %d, val: %d\n", idx_ret, num[idx_ret]);
+        if(idx_ret < mid_idx) beg = idx_ret+1;
+        else end = idx_ret-1;
+    }
+    //printf("\n");
+    result = num[idx_ret];
+
+    if(!CheckMoreThanHalf(num, length, num[idx_ret])) result = 0;
+    return result;
+}
+
+// ====================方法2====================
+int MoreThanHalfNum_Solution2(int* num, int length) {
+    if(CheckInvalidArray(num, length)) return 0;
+
+    int result = num[0];
+    int sign = 1;
+
+    int i = 1;
+    while(i < length){
+        if(num[i] == result)
+            sign++;
+        else
+            sign--;
+        i++;
+        if(!sign) result = num[i];
+    }
+
+    if(!CheckMoreThanHalf(num, length, result)) result = 0;
+    return result;
+}
+```
 
 
