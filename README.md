@@ -34,6 +34,8 @@
 	* [面试题37：序列化二叉树](#面试题37序列化二叉树)
 	* [面试题38：字符串的排列](#面试题38字符串的排列)
 	* [面试题39：数组中出现次数超过一半的数字](#面试题39数组中出现次数超过一半的数字)
+	* [面试题40：最小的k个数](#面试题40最小的k个数)
+	* [面试题41：数据流中的中位数](#面试题41数据流中的中位数)
 
 <!-- vim-markdown-toc -->
 
@@ -1376,11 +1378,23 @@ void Permutation(char* p_str){
 }
 ```
 
+
 ## 面试题39：数组中出现次数超过一半的数字
 
-题目：数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如，输入一个长度为9的数组{1，2，3，2，2，2，5，4，2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。
+**题目：**  
+数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如，输入一个长度为9的数组{1，2，3，2，2，2，5，4，2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。
 
-解法：xxxxxxxxxxxxxxxxxxx
+**解法**  
+这里用到一个前面的实现的函数(前面我没写)--partition()，就是将一个数组分成左边小、右边大的数组，并返回分界线的索引。我实现的时候用的是数组最后一个元素作为中间元素。  
+
+因为一个数字出现次数超一半，所以数组中间的元素必定是该元素。只需查找**位于数组中间的、将数组分成两半的元素值**即可。
+
+该题有两种方法：  
+1. 利用partition()将数组分成两边，检查索引值是否为中间值，是的话返回该值。  
+2. 从头遍历数组，用一个变量sign记录遍历过程中出现次数最多的字符的次数。若碰到不同的字符，该次数减小。
+
+**注意**  
+因为题目要求找出超过一半的字符，但是给的数组可能并没有这样超一半的，所以在找出结果后要检查是否满足要求。
 
 ```c
 // return the index of data[end]'s final position
@@ -1451,5 +1465,66 @@ int MoreThanHalfNum_Solution2(int* num, int length) {
     return result;
 }
 ```
+
+## 面试题40：最小的k个数
+
+题目：输入n个整数，找出其中最小的k个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。
+
+**解法**  
+首先想到的是排序后再输出前k个数，复杂度为O(nlogn)，但不是优解。最优解有如下两种：
+1. 若可修改原数组，利用之前的partition()函数，找到其返回值为k的值。T(n)=O(n)，
+2. 若不能修改原数组input，我们需要一个数据结构ouput来保存最小k个数的值。当output满了，且input[i]>(output的最大值），将最大值替换为input[i]。  因为每次都要替换最大值，我们可以用大根堆或者红黑树，但是标准库里没有大根堆，直接实现代码量大，所以选择标准库里使用红黑树作为原理的multiset数据结构。  该方法T(n)=O(nlogk).
+
+```c
+// ====================方法1====================
+void GetLeastNumbers_Solution1(int *input, int n, int *output, int k){
+    if(!input or !output or k < 0 or k > n) return;
+
+    int idx = -1;
+    int beg = 0;
+    int end = n-1;
+    while(idx != k-1){ // k-1
+        idx = Partition(input, n, beg, end);
+        if(idx < k-1) beg = idx+1;
+        else end = idx-1;
+    }
+
+    for(int i = 0; i < k; i++) output[i] = input[i];
+}
+
+// ====================方法2====================
+
+typedef multiset<int, std::greater<int>> int_set;
+typedef multiset<int, std::greater<int>>::iterator set_iterator;
+void GetLeastNumbers_Solution2(const vector<int>& data, int_set& least_num, int k){
+    if(k > data.size() or k < 0) return;
+
+    least_num.clear();
+    int i = 0;
+    while(i < k){
+        //printf("data[i]:%d\n",data[i]);
+        least_num.insert(data[i++]);
+    }
+
+    while(i < data.size()){
+        int max_num = *least_num.begin();
+        if( data[i] < max_num) {
+            //printf("max_num:%d\n",max_num);
+            //printf("data[i]:%d\n",data[i]);
+            least_num.erase(max_num);
+            least_num.insert(data[i]);
+        }
+        ++i;
+    }
+}
+```
+
+## 面试题41：数据流中的中位数
+
+题目：如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
+
+**解法**  
+
+
 
 
