@@ -1524,7 +1524,70 @@ void GetLeastNumbers_Solution2(const vector<int>& data, int_set& least_num, int 
 题目：如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
 
 **解法**  
+有关堆的函数(默认建最大堆):  
+* 头文件:#include <algorithm>
+* make_heap(): 建堆,平均时间复杂度O(3n), 最坏时间复杂度O(nlogn).
+* pop_heap(): 开头节点和最后一个节点互换, 堆大小减一, 将新的数组建堆.
+* push_heap(): 
+* sort_heap(): T(n) = O(nlogn)  
 
+[make_heap](http://www.cplusplus.com/reference/algorithm/make_heap/)有更详细内容.  
 
+首先中位数在数组长度为奇数的情况下为中间值,偶数的时候为中间两个的平均数.  
+最优的方法是把数组分成两份. 需要这么一个结构,使中间的数能把数组分成左小右大的结构, 且左右两部分可以不需要排好序, 中间值即为中位数. 这里可以用两个堆来实现, 左边用最大堆, 右边用最小堆. 要保证`最大堆的堆顶<最小堆的堆顶`,  就能满足前面的条件, 即将数组分成了左小右大的序列, 中位数即为**大堆堆顶或小堆堆顶元素(或它们的和)**. 这个方法的插入元素复杂度O(logn),查找复杂度O(1), 整体时间复杂度相对低.  
 
+实现细节:  
+* 为了平衡两个堆的大小, 可以规定: 若当前元素个数为奇,插入到大根堆; 为偶,插小根堆.  
+* 若插入后, 破坏了`最大堆的堆顶<最小堆的堆顶`这个条件, 可以先插入另一个堆, 调整好堆后, 再把调整后的堆的最小值(或最大)插入到另一个堆. 
 
+**注意**  
+优先级`==`>位运算符`&`
+
+```c
+template<typename T> class DynamicArray{
+public:
+    void Insert(T num){
+        //even
+        if((min.size()+max.size() & 1) == 0){
+            if(!max.empty() and num < max.front()){
+                max.push_back(num);
+                push_heap(max.begin(), max.end());
+                num = max.front();
+                pop_heap(max.begin(), max.end());
+                max.pop_back();
+            }
+            min.push_back(num);
+            push_heap(min.begin(), min.end(), greater<T>());
+
+        }
+        //odd
+        else {
+            if(!min.empty() and num > min.front()){
+                min.push_back(num);
+                push_heap(min.begin(), min.end(), greater<T>());
+                num = min.front();
+
+                pop_heap(min.begin(), min.end(), greater<T>());
+                min.pop_back();
+            }
+            max.push_back(num);
+            push_heap(max.begin(), max.end());
+        }
+    }
+
+    T GetMedian(){
+        int size = max.size() + min.size();
+        if(size <= 0) throw length_error("No numbers");
+
+        T median = 0;
+
+        if(size & 1) median = min.front();
+        else median = (max.front() + min.front())/2;
+
+        return median;
+    }
+private:
+    vector<T> max;
+    vector<T> min;
+};
+```
