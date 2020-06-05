@@ -36,6 +36,8 @@
 	* [面试题39：数组中出现次数超过一半的数字](#面试题39数组中出现次数超过一半的数字)
 	* [面试题40：最小的k个数](#面试题40最小的k个数)
 	* [面试题41：数据流中的中位数](#面试题41数据流中的中位数)
+	* [面试题42：连续子数组的最大和](#面试题42连续子数组的最大和)
+	* [面试题43：1~n整数中1出现的次数](#面试题431n整数中1出现的次数)
 
 <!-- vim-markdown-toc -->
 
@@ -1591,3 +1593,89 @@ private:
     vector<T> min;
 };
 ```
+
+## 面试题42：连续子数组的最大和
+
+题目：输入一个整型数组，数组里有正数也有负数。数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。要求时间复杂度为O（n）。
+
+**解法:**  
+从头往后遍历,  
+若sum>0,说明前面的和可能可以和后边的数相加, 使值变大, 直到大于max值.  
+若sum<0, 说明前面的值都可以弃用了, 重新从sum=0开始算, 因为加上后会让整体值变小.  
+时间复杂度为O(n)
+
+```c
+int FindGreatestSumOfSubArray(int *p_data, int length){
+    if(!p_data or length <= 0) {
+        g_InvalidInput = true;
+        return 0;
+    }
+    int max = INT_MIN;
+    int sum = 0;
+
+    for(int i = 0; i < length; i++){
+        //printf("sum_cur:%d p_data[i]: %d \n", sum_cur, p_data[i]);
+        //printf("max:%d \n",max);
+        sum += p_data[i];
+
+        if(sum > max) max = sum;
+
+        if(sum < 0) sum = 0;
+    }
+    return max;
+}
+```
+
+思路可总结为:  
+f(i)表前i-1个元素的最大和,则:  
+![](assets/img42.png)  
+
+## 面试题43：1~n整数中1出现的次数
+
+题目：输入一个整数n，求1~n这n个整数的十进制表示中1出现的次数。例如，输入12，1~12这些整数中包含1的数字有1、10、11和12，1一共出现了5次。
+
+**解法**  
+通过举例找规律: 比如21345, 分成两个个区间,   
+1. 第二个区间: 1346-21345,  
+	* 要计算第二个区间内1的个数, 需计算**最高位1的个数+其余位中1的个数**:  
+		* 最高位1的个数: 发现只有10000-19999区间内, 最高位有1.
+		* 其余位: 要计算1出现的个数, 先取后四位中的一位设为1, 其余三位可设0-9, 计算其排列值可得.
+2. 第一个区间: 0-1245
+	* 通过递归得到.
+
+![](assets/img43.png)
+
+易错: c字符串结束标志为'\0',不是nullptr.
+
+```c
+int NumberOf1(const char *str_n);
+int NumberOf1Between1AndN_Solution2(int n){
+    if(n < 0) return 0;
+    char str_n[64];
+    sprintf(str_n, "%d", n);
+    return NumberOf1(str_n);
+}
+
+int NumberOf1(const char *str_n){
+    if(!str_n or *str_n == '\0' ) return 0; //'\0'
+	//第一个数字为0, 进行下一个递归
+    if(*str_n == 0 +'0') return NumberOf1(str_n+1);
+
+    int first_num = *str_n-'0';
+    size_t length = strlen(str_n);
+    if(length == 1) return first_num >= 1 ? 1 : 0;
+
+    int num_of_first = 0;
+    if(first_num == 1){
+        num_of_first = atoi(str_n+1) + 1; //+1
+    }
+    else num_of_first = pow(10, length-1);
+
+    int num_of_others = (length-1)*pow(10, length-2)*first_num;
+
+    int num_of_recursive = NumberOf1(str_n+1);
+    //printf("%d\n",num_of_recursive + num_of_others + num_of_first);
+    return num_of_recursive + num_of_others + num_of_first;
+}
+```
+
